@@ -1,0 +1,39 @@
+[package]
+name = "sam_shader_engine"
+version = "0.1.0"
+edition = "2021"
+authors = ["Sam Tindal <samtindal@pm.me>"]
+description = "Object-Oriented Rust WebAssembly WebGL2 Shader Engine for samtindal.com"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+wasm-bindgen = "0.2.99"
+js-sys = "0.3.76"
+console_error_panic_hook = { version = "0.1.7", optional = true }
+
+[dependencies.web-sys]
+version = "0.3.76"
+features = [
+    "console",
+    "Window",
+    "Document",
+    "Element",
+    "HtmlCanvasElement",
+    "WebGl2RenderingContext",
+    "WebGlProgram",
+    "WebGlShader",
+    "WebGlUniformLocation",
+    "WebGlBuffer",
+    "WebGlVertexArrayObject",
+    "Performance"
+]
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3.49"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1

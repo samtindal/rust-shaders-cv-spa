@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Sam Tindal - Cloud Software & Security Engineer with 9 years experience across cloud platforms, 6 at Amazon. Security & compliance, threat modeling, FIDO2/WebAuthn, AWS CDK, Python, Java, C#, Rust." />
+  <meta name="keywords" content="Sam Tindal, Cloud Engineer, Security Engineer, AWS, Amazon Kuiper, Python, Rust, WebAssembly, WebGL, Resume" />
+  <meta name="author" content="Sam Tindal" />
+
+  <!-- OpenGraph / Social Meta -->
+  <meta property="og:title" content="Sam Tindal | Cloud Software & Security Engineer" />
+  <meta property="og:description" content="Resume & Interactive Rust WebAssembly WebGL2 Shader Engine by Sam Tindal." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://samtindal.com" />
+
+  <title>Sam Tindal | Cloud & Security Software Engineer</title>
+
+  <!-- Google Fonts: Inter, Outfit, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="/src_web/styles/main.css" />
+  <link rel="stylesheet" href="/src_web/styles/hud.css" />
+  <link rel="stylesheet" href="/src_web/styles/resume.css" />
+  <link rel="stylesheet" href="/src_web/styles/print.css" media="print" />
+</head>
+<body>
+  <!-- Fixed Fullscreen Background WebGL2 Canvas driven by Rust WASM -->
+  <canvas id="shader-canvas"></canvas>
+
+  <!-- Interactive Floating HUD Controls for the Rust Shader Engine -->
+  <aside id="shader-hud" class="hud-panel" aria-label="Shader Engine Controls">
+    <div class="hud-header">
+      <div class="hud-title-group">
+        <span class="hud-status-dot"></span>
+        <span class="hud-title">RUST SHADER ENGINE</span>
+        <span class="hud-badge">WASM</span>
+      </div>
+      <div class="hud-header-actions">
+        <span id="hud-fps" class="hud-fps-counter">60 FPS</span>
+        <button id="hud-toggle-btn" class="hud-btn-icon" title="Minimize / Expand HUD" aria-label="Toggle HUD">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+      </div>
+    </div>
+
+    <div id="hud-body" class="hud-body">
+      <!-- Preset Switcher -->
+      <div class="hud-section">
+        <label class="hud-label">SHADER PRESET</label>
+        <div class="hud-presets-grid" id="hud-presets-container">
+          <!-- Dynamically populated from Rust EffectRegistry -->
+          <button class="preset-btn active" data-index="0">Quantum Core</button>
+          <button class="preset-btn" data-index="1">Cyber Grid</button>
+          <button class="preset-btn" data-index="2">Gravitational Nebula</button>
+        </div>
+        <p id="hud-effect-desc" class="hud-effect-desc">Raymarched 4D quantum core with chromatic aberration & gyroscopic mouse reaction.</p>
+      </div>
+
+      <!-- Realtime Parameter Sliders -->
+      <div class="hud-section">
+        <div class="hud-slider-row">
+          <div class="hud-slider-info">
+            <span class="hud-slider-name">Animation Speed</span>
+            <span id="val-speed" class="hud-slider-val">1.0x</span>
+          </div>
+          <input type="range" id="param-speed" min="0.2" max="3.0" step="0.1" value="1.0" />
+        </div>
+
+        <div class="hud-slider-row">
+          <div class="hud-slider-info">
+            <span class="hud-slider-name">Space Warp</span>
+            <span id="val-warp" class="hud-slider-val">1.2x</span>
+          </div>
+          <input type="range" id="param-warp" min="0.0" max="2.5" step="0.1" value="1.2" />
+        </div>
+
+        <div class="hud-slider-row">
+          <div class="hud-slider-info">
+            <span class="hud-slider-name">Glow Bloom</span>
+            <span id="val-glow" class="hud-slider-val">1.4x</span>
+          </div>
+          <input type="range" id="param-glow" min="0.2" max="2.5" step="0.1" value="1.4" />
+        </div>
+
+        <div class="hud-slider-row">
+          <div class="hud-slider-info">
+            <span class="hud-slider-name">Chromatic Shift</span>
+            <span id="val-color" class="hud-slider-val">0.15</span>
+          </div>
+          <input type="range" id="param-color" min="0.0" max="1.0" step="0.05" value="0.15" />
+        </div>
+      </div>
+
+      <div class="hud-footer-hint">
+        <span class="hint-icon">✦</span> Click anywhere on screen to trigger interactive ripple shockwaves
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Resume Content Container -->
+  <main class="resume-wrapper">
+    <!-- Header Hero Section -->
+    <header class="resume-card hero-card">
+      <div class="hero-top">
+        <div class="hero-identity">
+          <div class="hero-tagline-chip">
+            <span class="chip-pulse"></span>
+            <span>Cloud &amp; Security Engineering</span>
+          </div>
+          <h1 class="hero-name">Sam Tindal</h1>
+          <p class="hero-title">Staff / Senior Cloud Software &amp; Security Engineer</p>
+        </div>
+
+        <div class="hero-actions">
+          <button id="btn-print" class="btn btn-primary" title="Export or Print 2-Page PDF">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            <span>Print / PDF</span>
+          </button>
+          <a href="mailto:samtindal@pm.me" class="btn btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+            <span>Email</span>
+          </a>
+          <a href="https://github.com/samtindal/rust-shaders-cv-spa" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            <span>GitHub</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Contact Metadata Chips -->
+      <div class="hero-contact-row">
+        <a href="tel:206-291-0062" class="contact-chip">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+          <span>206-291-0062</span>
+        </a>
+        <a href="mailto:samtindal@pm.me" class="contact-chip">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+          <span>samtindal@pm.me</span>
+        </a>
+        <span class="contact-chip">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          <span>Lawton, OK</span>
+        </span>
+        <span class="contact-chip status-chip">
+          <span class="status-indicator"></span>
+          <span>Available immediately</span>
+        </span>
+      </div>
+    </header>
+
+    <!-- Interactive Filter Nav -->
+    <nav class="filter-bar resume-card" aria-label="Filter experience by domain">
+      <span class="filter-label">Filter Focus:</span>
+      <div class="filter-buttons">
+        <button class="filter-btn active" data-filter="all">All Disciplines</button>
+        <button class="filter-btn" data-filter="security">Security &amp; Compliance</button>
+        <button class="filter-btn" data-filter="cloud">Cloud Architecture</button>
+        <button class="filter-btn" data-filter="infra">CI/CD &amp; Infrastructure</button>
+        <button class="filter-btn" data-filter="data">Data &amp; Systems</button>
+      </div>
+    </nav>
+
+    <!-- Executive Summary Card -->
+    <section class="resume-card">
+      <h2 class="section-title">
+        <span class="section-icon">01</span>
+        <span>Summary</span>
+      </h2>
+      <p class="summary-text">
+        Software engineer with <strong>nine years across cloud platforms</strong>, <strong>six of them at Amazon</strong>, with a recurring thread of security- and compliance-sensitive work: <strong>ITAR / HIPAA / GDPR</strong> compliant design, access governance, threat modeling, and a <strong>FIDO2/WebAuthn authentication architecture</strong> evaluation for a classified air-gapped environment. Primary language is <strong>Python</strong>, with production experience in <strong>Java</strong> and <strong>C#</strong>. Consistent pattern of fixing the process behind a recurring problem rather than the instance in front of him, including an internal tooling change that <strong>cut agent workflow time by up to 50%</strong>. Based in Lawton; does not currently hold a security clearance and is prepared to pursue one.
+      </p>
+    </section>
+
+    <!-- Skills Matrix Card -->
+    <section class="resume-card">
+      <h2 class="section-title">
+        <span class="section-icon">02</span>
+        <span>Technical Skills Matrix</span>
+      </h2>
+      <div class="skills-grid">
+        <div class="skill-category-card" data-domain="security">
+          <h3 class="skill-category-title">Security &amp; Compliance</h3>
+          <div class="skill-tags">
+            <span class="tag tag-accent">ITAR / HIPAA / GDPR</span>
+            <span class="tag tag-accent">Threat Modeling</span>
+            <span class="tag">Security Design Review</span>
+            <span class="tag">IAM Least-Privilege</span>
+            <span class="tag">RBAC &amp; Access Governance</span>
+            <span class="tag tag-highlight">OAuth 2.0 / OIDC / SAML / JWT</span>
+            <span class="tag tag-highlight">FIDO2 / WebAuthn</span>
+            <span class="tag">TLS</span>
+            <span class="tag">KMS Encryption</span>
+            <span class="tag">Secrets Management &amp; Rotation</span>
+            <span class="tag">CVE &amp; Supply-Chain Remediation</span>
+            <span class="tag">Incident Response</span>
+          </div>
+        </div>
+
+        <div class="skill-category-card" data-domain="cloud">
+          <h3 class="skill-category-title">Cloud &amp; Systems</h3>
+          <div class="skill-tags">
+            <span class="tag tag-accent">AWS Lambda</span>
+            <span class="tag">IAM</span>
+            <span class="tag">KMS</span>
+            <span class="tag">VPC</span>
+            <span class="tag">ECS &amp; Fargate</span>
+            <span class="tag">S3</span>
+            <span class="tag">CloudFront</span>
+            <span class="tag">SageMaker</span>
+            <span class="tag">CloudWatch</span>
+            <span class="tag">OpenSearch</span>
+            <span class="tag tag-highlight">Google Cloud</span>
+            <span class="tag">Linux Administration</span>
+            <span class="tag">Docker</span>
+            <span class="tag">Container Orchestration</span>
+          </div>
+        </div>
+
+        <div class="skill-category-card" data-domain="languages">
+          <h3 class="skill-category-title">Languages</h3>
+          <div class="skill-tags">
+            <span class="tag tag-accent">Python</span>
+            <span class="tag">Java</span>
+            <span class="tag">C#</span>
+            <span class="tag">SQL</span>
+            <span class="tag">JavaScript</span>
+            <span class="tag tag-highlight">Rust (WASM / WebGL2)</span>
+          </div>
+        </div>
+
+        <div class="skill-category-card" data-domain="infra">
+          <h3 class="skill-category-title">Infra &amp; Delivery</h3>
+          <div class="skill-tags">
+            <span class="tag tag-accent">AWS CDK</span>
+            <span class="tag">CloudFormation</span>
+            <span class="tag">Git &amp; PR Change Control</span>
+            <span class="tag">CI/CD Staged Promotion</span>
+            <span class="tag">Multi-Stage Approval Gates</span>
+            <span class="tag">Rollback Procedures</span>
+          </div>
+        </div>
+
+        <div class="skill-category-card" data-domain="data">
+          <h3 class="skill-category-title">Data &amp; Testing</h3>
+          <div class="skill-tags">
+            <span class="tag tag-accent">Apache Spark / PySpark</span>
+            <span class="tag">ETL Pipeline Orchestration</span>
+            <span class="tag">Elasticsearch / OpenSearch</span>
+            <span class="tag">JUnit</span>
+            <span class="tag">TestNG</span>
+            <span class="tag">Mockito</span>
+            <span class="tag">Cypress</span>
+          </div>
+        </div>
+
+        <div class="skill-category-card" data-domain="tools">
+          <h3 class="skill-category-title">Tools &amp; Platforms</h3>
+          <div class="skill-tags">
+            <span class="tag">JIRA</span>
+            <span class="tag">Confluence</span>
+            <span class="tag">Bitbucket</span>
+            <span class="tag">ServiceNow</span>
+            <span class="tag">Cloudflare Pages</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Professional Experience Timeline -->
+    <section class="resume-card">
+      <h2 class="section-title">
+        <span class="section-icon">03</span>
+        <span>Professional Experience</span>
+      </h2>
+
+      <div class="experience-timeline">
+        <!-- Role 1: r4 Technologies -->
+        <article class="timeline-item" data-domains="cloud security infra data">
+          <div class="timeline-marker"></div>
+          <div class="timeline-content">
+            <div class="timeline-header">
+              <div class="role-company-group">
+                <h3 class="role-title">Intermediate Technical Consultant</h3>
+                <h4 class="company-name">r4 Technologies, Inc.</h4>
+              </div>
+              <div class="date-location-group">
+                <span class="date-badge">August 2025 – September 2026</span>
+                <span class="location-badge">Lawton, OK</span>
+              </div>
+            </div>
+            <ul class="bullet-list">
+              <li data-tag="cloud">Supported the configuration baseline for a multi-tenant cloud analytics platform under the platform's senior technical lead, maintaining per-tenant deployment configuration across customer environments on <strong>Google Cloud</strong>.</li>
+              <li data-tag="security">Authored a reusable dependency supply-chain security workflow for <strong>npm and pip</strong> covering package name verification, vulnerability triage, and remediation.</li>
+              <li data-tag="security">Reviewed and dispositioned <strong>RBAC access requests</strong> against documented role definitions and project scope, enforcing least privilege across customer environments.</li>
+              <li data-tag="security">Scoped a cross-customer <strong>GDPR right-to-erasure</strong> approach covering data handling and deletion across every customer environment rather than per-customer workarounds.</li>
+              <li data-tag="infra">Built tenant-generic <strong>QA automation</strong> that verifies configured customer environments after every deployment, combining deterministic checks with automated failure triage.</li>
+              <li data-tag="infra">Authored a <strong>pull-request-based change-submission process</strong> proposing reviewable, auditable change control in place of ad hoc infrastructure requests.</li>
+              <li>Authored the proof-of-concept intake process defining how candidate work is scoped and evaluated before commitment to a production engagement.</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- Role 2: Amazon Kuiper via Aditi -->
+        <article class="timeline-item" data-domains="security cloud">
+          <div class="timeline-marker"></div>
+          <div class="timeline-content">
+            <div class="timeline-header">
+              <div class="role-company-group">
+                <h3 class="role-title">Systems Development Engineer (Contract)</h3>
+                <h4 class="company-name">Aditi Consulting, Inc. <span class="client-label">(Client: Amazon Kuiper)</span></h4>
+              </div>
+              <div class="date-location-group">
+                <span class="date-badge">April 2024</span>
+                <span class="location-badge">Bellevue, WA</span>
+              </div>
+            </div>
+            <ul class="bullet-list">
+              <li data-tag="security">Evaluated architecture options for a self-contained <strong>FIDO2/WebAuthn authentication server</strong> providing hardware-backed multi-factor authentication for users operating inside a <strong>classified air-gapped environment</strong>, replacing password-based login.</li>
+              <li>Conducted stakeholder requirements elicitation, defining functional and non-functional specifications covering performance, scalability, and security constraints.</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- Role 3: Whole Foods Market via Specialist Staffing -->
+        <article class="timeline-item" data-domains="security cloud infra">
+          <div class="timeline-marker"></div>
+          <div class="timeline-content">
+            <div class="timeline-header">
+              <div class="role-company-group">
+                <h3 class="role-title">Software Engineer</h3>
+                <h4 class="company-name">Specialist Staffing Services, Inc. <span class="client-label">(Client: Whole Foods Market)</span></h4>
+              </div>
+              <div class="date-location-group">
+                <span class="date-badge">March 2023 – March 2024</span>
+                <span class="location-badge">Seattle, WA</span>
+              </div>
+            </div>
+            <ul class="bullet-list">
+              <li data-tag="cloud">Led a team architecting and delivering a <strong>low-latency service on the customer checkout path</strong>, from container networking through private connectivity to internal dependency services.</li>
+              <li data-tag="security">Designed authentication and authorization covering <strong>OAuth 2.0 flows</strong>, token validation, and service-to-service auth, scoped IAM roles to least privilege, and moved service credentials into managed secrets storage with rotation.</li>
+              <li data-tag="security">Drove security design review and <strong>threat modeling</strong> for the service, and remediated vulnerability and dependency findings ahead of release.</li>
+              <li data-tag="infra">Modeled infrastructure as code and designed <strong>CI/CD delivery with multi-stage approval gates</strong>.</li>
+              <li>Mentored 6 engineers on development practice, design patterns, cloud architecture, and networking and security fundamentals.</li>
+              <li data-tag="security">Produced design and control evidence for compliance and internal audit review.</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- Role 4: Amazon, Inc. -->
+        <article class="timeline-item" data-domains="cloud security data infra">
+          <div class="timeline-marker"></div>
+          <div class="timeline-content">
+            <div class="timeline-header">
+              <div class="role-company-group">
+                <h3 class="role-title">Software Development Engineer</h3>
+                <h4 class="company-name">Amazon, Inc.</h4>
+              </div>
+              <div class="date-location-group">
+                <span class="date-badge">May 2020 – March 2023</span>
+                <span class="location-badge">Seattle, WA</span>
+              </div>
+            </div>
+            <ul class="bullet-list">
+              <li data-tag="infra">Owned staged deployment pipelines for big data pipeline services, defining <strong>stage promotion, one-box and bake periods, approval gates</strong>, and automated rollback on alarm.</li>
+              <li data-tag="infra">Authored and operated <strong>change-management records</strong> for deployments outside the standard pipeline, specifying staging steps, rollback alarms, and failure contingencies, and shepherded each through multi-approver review.</li>
+              <li>Instrumented services with structured and method-level logging, aggregating output into operational dashboards for visibility and on-call debugging.</li>
+              <li data-tag="security">Implemented designs complying with export control, data retention, governance, and deletion regulations including <strong>ITAR, HIPAA, and GDPR</strong>, applying data classification, access restriction, and encryption across pipeline and storage layers.</li>
+              <li data-tag="data">Maintained an <strong>ETL pipeline</strong> ingesting, augmenting, and publishing data using <strong>Spark, Java, and Python microservices</strong>.</li>
+              <li data-tag="data">Integrated machine learning model output into a search index and maintained a React dashboard over it with automated UI testing.</li>
+              <li data-tag="security">Responded to security findings on call and drove remediation across shared services under mandated timelines.</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- Role 5: AWS Cloud Support -->
+        <article class="timeline-item" data-domains="cloud">
+          <div class="timeline-marker"></div>
+          <div class="timeline-content">
+            <div class="timeline-header">
+              <div class="role-company-group">
+                <h3 class="role-title">Cloud Support Engineer</h3>
+                <h4 class="company-name">Amazon Web Services, Inc. (AWS)</h4>
+              </div>
+              <div class="date-location-group">
+                <span class="date-badge">March 2017 – May 2020</span>
+                <span class="location-badge">Seattle, WA</span>
+              </div>
+            </div>
+            <p class="role-subtext">Cloud Support Engineer (2018–2020) · Technical Customer Support Specialist (2017–2018)</p>
+            <ul class="bullet-list">
+              <li data-tag="cloud">Completed formal AWS infrastructure fundamentals training covering compute, storage, and databases, then supported customers on account and billing across the full service catalog.</li>
+              <li data-tag="cloud">Advanced from the general support tier onto a specialist team focused on <strong>domain registration and DNS</strong>.</li>
+              <li data-tag="cloud">Diagnosed customer architecture and service-level failures at volume in premium support, building depth in service internals.</li>
+              <li data-tag="infra">Identified and closed workflow gaps in internal agent tooling, submitting and reviewing commits, including a ticket-creation search function that <strong>cut agent workflow time by up to 50%</strong>.</li>
+              <li>Maintained a development environment and submitted code reviews throughout both support roles, including contributions to an internal Python Flask application and user scripting libraries.</li>
+            </ul>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Education Section -->
+    <section class="resume-card">
+      <h2 class="section-title">
+        <span class="section-icon">04</span>
+        <span>Education</span>
+      </h2>
+      <div class="education-grid">
+        <div class="education-card">
+          <div class="education-header">
+            <h3 class="degree-title">M.S., Engineering Leadership and Management</h3>
+            <span class="date-badge">Jan 2025 – Dec 2027 (in progress)</span>
+          </div>
+          <p class="institution-name">The University of Oklahoma, Gallogly College of Engineering</p>
+        </div>
+
+        <div class="education-card">
+          <div class="education-header">
+            <h3 class="degree-title">B.A., Journalism (Advertising)</h3>
+            <span class="date-badge">December 2012</span>
+          </div>
+          <p class="institution-name">The University of Oklahoma, Gaylord College of Journalism and Mass Communication</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Page Footer -->
+    <footer class="page-footer">
+      <div class="footer-badges">
+        <span class="footer-badge"><span class="badge-dot"></span> Built with Rust WebAssembly</span>
+        <span class="footer-badge">WebGL2 Accelerated</span>
+        <span class="footer-badge">Cloudflare Pages</span>
+        <span class="footer-badge">Hosted at samtindal.com</span>
+      </div>
+      <p class="footer-copy">&copy; 2026 Sam Tindal. All rights reserved.</p>
+    </footer>
+  </main>
+
+  <!-- Vite Web Entrypoint -->
+  <script type="module" src="/src_web/main.js"></script>
+</body>
+</html>

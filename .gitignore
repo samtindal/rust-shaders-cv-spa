@@ -1,0 +1,23 @@
+# Rust
+/target/
+**/*.rs.bk
+Cargo.lock
+
+# Node / Web
+/node_modules/
+/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# wasm-pack generated
+# Note: pkg can be built during build or checked in; usually built during CI
+# We keep pkg/ in git or build it in CI
+/pkg/
+
+# OS and IDE
+.DS_Store
+*.swp
+*.swo
+.vscode/
+.idea/

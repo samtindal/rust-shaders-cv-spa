@@ -1,0 +1,16 @@
+{
+  "name": "samtindal-resume-spa",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build:wasm": "npx wasm-pack build --target web --release",
+    "build": "npm run build:wasm && vite build",
+    "preview": "vite preview",
+    "test": "cargo test"
+  },
+  "devDependencies": {
+    "vite": "^5.4.2"
+  }
+}
