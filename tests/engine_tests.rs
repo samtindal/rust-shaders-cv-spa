@@ -126,3 +126,116 @@ fn test_effects_have_valid_shaders() {
         assert!(fs.contains("u_resolution"), "Fragment shader must accept u_resolution uniform");
     }
 }
+
+#[test]
+fn test_mobile_effects_and_mode_switching() {
+    use sam_shader_engine::effects::mobile_nebula::NebulaDriftMobileEffect;
+    use sam_shader_engine::effects::mobile_filaments::IonFilamentsMobileEffect;
+    use sam_shader_engine::effects::mobile_pulsar::QuantumPulsarMobileEffect;
+
+    let mut registry = EffectRegistry::new();
+
+    // Register desktop effects
+    registry.register(Box::new(QuantumCoreEffect::new()));
+    registry.register(Box::new(CyberGridEffect::new()));
+    registry.register(Box::new(GravitationalNebulaEffect::new()));
+
+    // Register mobile effects
+    registry.register_mobile(Box::new(NebulaDriftMobileEffect::new()));
+    registry.register_mobile(Box::new(IonFilamentsMobileEffect::new()));
+    registry.register_mobile(Box::new(QuantumPulsarMobileEffect::new()));
+
+    assert!(!registry.is_mobile(), "Default should be desktop mode");
+    assert_eq!(registry.effects_count(), 3);
+    assert_eq!(registry.active_effect().name(), "Quantum Core");
+
+    // Switch to mobile mode
+    registry.set_mobile_mode(true);
+    assert!(registry.is_mobile());
+    assert_eq!(registry.effects_count(), 3);
+    assert_eq!(registry.active_effect().name(), "Nebula Drift (Mobile)");
+
+    let names = registry.effect_names();
+    assert_eq!(names, vec!["Nebula Drift (Mobile)", "Ion Filaments (Mobile)", "Quantum Pulsar (Mobile)"]);
+
+    // Test mobile effect preset switching
+    assert!(registry.switch_effect(1).is_ok());
+    assert_eq!(registry.active_effect().name(), "Ion Filaments (Mobile)");
+
+    assert!(registry.switch_effect(2).is_ok());
+    assert_eq!(registry.active_effect().name(), "Quantum Pulsar (Mobile)");
+
+    // Switch back to desktop mode
+    registry.set_mobile_mode(false);
+    assert!(!registry.is_mobile());
+    assert_eq!(registry.active_effect().name(), "Quantum Core");
+}
+
+#[test]
+fn test_mobile_shaders_are_valid_and_non_raymarched() {
+    use sam_shader_engine::effects::mobile_nebula::NebulaDriftMobileEffect;
+    use sam_shader_engine::effects::mobile_filaments::IonFilamentsMobileEffect;
+    use sam_shader_engine::effects::mobile_pulsar::QuantumPulsarMobileEffect;
+
+    let mobile_effects: Vec<Box<dyn ShaderEffect>> = vec![
+        Box::new(NebulaDriftMobileEffect::new()),
+        Box::new(IonFilamentsMobileEffect::new()),
+        Box::new(QuantumPulsarMobileEffect::new()),
+    ];
+
+    for effect in mobile_effects {
+        let vs = effect.vertex_source();
+        let fs = effect.fragment_source();
+
+        assert!(vs.contains("#version 300 es"));
+        assert!(fs.contains("#version 300 es"));
+        assert!(fs.contains("out vec4 fragColor"));
+        assert!(fs.contains("u_time"));
+        assert!(fs.contains("u_resolution"));
+        assert!(fs.contains("u_mouse"));
+        // Mobile shaders should NOT contain heavy raymarch loops (for < 64 etc.)
+        assert!(!fs.contains("for (int i = 0; i < 64; i++)"), "Mobile shaders must not use heavy 64-step raymarching loops");
+    }
+}
+
+#[test]
+fn test_scroll_tracks_absolute_position_not_accumulated_events() {
+    // JS forwards window.scrollY (absolute) on every scroll event; a touch swipe fires many
+    let mut controller = InputController::new();
+    for _ in 0..50 {
+        controller.on_scroll(1000.0);
+    }
+    for _ in 0..200 {
+        controller.update(0.016);
+    }
+    assert!((controller.scroll() - 1000.0).abs() < 1.0, "scroll drifted to {}", controller.scroll());
+
+    // Scrolling back to the top must return the parallax offset to zero
+    controller.on_scroll(0.0);
+    for _ in 0..200 {
+        controller.update(0.016);
+    }
+    assert!(controller.scroll().abs() < 1.0, "scroll stuck at {}", controller.scroll());
+}
+
+#[test]
+fn test_mobile_shaders_keep_content_on_screen_when_scrolled() {
+    use sam_shader_engine::effects::mobile_nebula::NebulaDriftMobileEffect;
+    use sam_shader_engine::effects::mobile_filaments::IonFilamentsMobileEffect;
+    use sam_shader_engine::effects::mobile_pulsar::QuantumPulsarMobileEffect;
+
+    // The single-column phone layout scrolls ~8500px; a linear scroll offset on uv or the
+    // horizon slides the whole effect off-canvas. Scroll must drive phase, not position.
+    let mobile_effects: Vec<Box<dyn ShaderEffect>> = vec![
+        Box::new(NebulaDriftMobileEffect::new()),
+        Box::new(IonFilamentsMobileEffect::new()),
+        Box::new(QuantumPulsarMobileEffect::new()),
+    ];
+
+    for effect in mobile_effects {
+        let fs = effect.fragment_source();
+        assert!(fs.contains("u_scroll"), "{} should still react to scroll", effect.name());
+        assert!(!fs.contains("uv.y += u_scroll"), "{} offsets uv by scroll", effect.name());
+        assert!(!fs.contains("- u_scroll *"), "{} offsets the horizon by scroll", effect.name());
+    }
+}

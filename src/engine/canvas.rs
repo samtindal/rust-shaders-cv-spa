@@ -5,21 +5,25 @@ pub struct CanvasManager {
     width: u32,
     height: u32,
     dpr: f64,
+    is_mobile: bool,
 }
 
 impl CanvasManager {
     pub fn new(canvas: HtmlCanvasElement) -> Self {
-        let window = web_sys::window().expect("Window not found");
-        let dpr = window.device_pixel_ratio().min(2.0); // Cap at 2.0 for performance
-
         let mut manager = Self {
             canvas,
             width: 0,
             height: 0,
-            dpr,
+            dpr: 1.0,
+            is_mobile: false,
         };
         manager.resize_to_window();
         manager
+    }
+
+    pub fn set_mobile(&mut self, is_mobile: bool) -> bool {
+        self.is_mobile = is_mobile;
+        self.resize_to_window()
     }
 
     pub fn resize_to_window(&mut self) -> bool {
@@ -28,7 +32,8 @@ impl CanvasManager {
             None => return false,
         };
 
-        self.dpr = window.device_pixel_ratio().min(2.0);
+        let max_dpr = if self.is_mobile { 1.25 } else { 2.0 };
+        self.dpr = window.device_pixel_ratio().min(max_dpr);
         let client_w = window
             .inner_width()
             .ok()

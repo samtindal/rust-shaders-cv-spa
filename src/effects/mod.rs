@@ -1,6 +1,9 @@
 pub mod quantum_core;
 pub mod cyber_grid;
 pub mod gravitational_nebula;
+pub mod mobile_nebula;
+pub mod mobile_filaments;
+pub mod mobile_pulsar;
 
 use web_sys::{WebGl2RenderingContext, WebGlProgram};
 use wasm_bindgen::JsValue;
@@ -44,8 +47,11 @@ pub trait ShaderEffect {
 }
 
 pub struct EffectRegistry {
-    effects: Vec<Box<dyn ShaderEffect>>,
-    active_index: usize,
+    desktop_effects: Vec<Box<dyn ShaderEffect>>,
+    mobile_effects: Vec<Box<dyn ShaderEffect>>,
+    is_mobile: bool,
+    desktop_index: usize,
+    mobile_index: usize,
 }
 
 impl Default for EffectRegistry {
@@ -57,40 +63,83 @@ impl Default for EffectRegistry {
 impl EffectRegistry {
     pub fn new() -> Self {
         Self {
-            effects: Vec::new(),
-            active_index: 0,
+            desktop_effects: Vec::new(),
+            mobile_effects: Vec::new(),
+            is_mobile: false,
+            desktop_index: 0,
+            mobile_index: 0,
         }
     }
 
     pub fn register(&mut self, effect: Box<dyn ShaderEffect>) {
-        self.effects.push(effect);
+        self.desktop_effects.push(effect);
+    }
+
+    pub fn register_mobile(&mut self, effect: Box<dyn ShaderEffect>) {
+        self.mobile_effects.push(effect);
+    }
+
+    pub fn is_mobile(&self) -> bool {
+        self.is_mobile
+    }
+
+    pub fn set_mobile_mode(&mut self, is_mobile: bool) {
+        self.is_mobile = is_mobile;
+    }
+
+    fn current_effects(&self) -> &Vec<Box<dyn ShaderEffect>> {
+        if self.is_mobile && !self.mobile_effects.is_empty() {
+            &self.mobile_effects
+        } else {
+            &self.desktop_effects
+        }
+    }
+
+    fn current_effects_mut(&mut self) -> &mut Vec<Box<dyn ShaderEffect>> {
+        if self.is_mobile && !self.mobile_effects.is_empty() {
+            &mut self.mobile_effects
+        } else {
+            &mut self.desktop_effects
+        }
     }
 
     pub fn effects_count(&self) -> usize {
-        self.effects.len()
+        self.current_effects().len()
     }
 
     pub fn active_index(&self) -> usize {
-        self.active_index
+        if self.is_mobile && !self.mobile_effects.is_empty() {
+            self.mobile_index
+        } else {
+            self.desktop_index
+        }
     }
 
     pub fn active_effect(&self) -> &dyn ShaderEffect {
-        &(*self.effects[self.active_index])
+        let idx = self.active_index();
+        &(*self.current_effects()[idx])
     }
 
     pub fn active_effect_mut(&mut self) -> &mut dyn ShaderEffect {
-        &mut (*self.effects[self.active_index])
+        let idx = self.active_index();
+        let effects = self.current_effects_mut();
+        &mut (*effects[idx])
     }
 
     pub fn switch_effect(&mut self, index: usize) -> Result<(), &'static str> {
-        if index >= self.effects.len() {
+        let count = self.current_effects().len();
+        if index >= count {
             return Err("Shader effect index out of bounds");
         }
-        self.active_index = index;
+        if self.is_mobile && !self.mobile_effects.is_empty() {
+            self.mobile_index = index;
+        } else {
+            self.desktop_index = index;
+        }
         Ok(())
     }
 
     pub fn effect_names(&self) -> Vec<&'static str> {
-        self.effects.iter().map(|e| e.name()).collect()
+        self.current_effects().iter().map(|e| e.name()).collect()
     }
 }

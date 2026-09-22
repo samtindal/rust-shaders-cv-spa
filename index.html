@@ -49,14 +49,17 @@
     <div id="hud-body" class="hud-body">
       <!-- Preset Switcher -->
       <div class="hud-section">
-        <label class="hud-label">SHADER PRESET</label>
+        <div class="hud-label-row">
+          <label class="hud-label">SHADER PRESETS</label>
+          <button id="hud-mode-toggle-btn" class="mode-toggle-btn" title="Toggle between Mobile and Desktop shader engines">⚡ Mobile (Active)</button>
+        </div>
         <div class="hud-presets-grid" id="hud-presets-container">
           <!-- Dynamically populated from Rust EffectRegistry -->
-          <button class="preset-btn active" data-index="0">Quantum Core</button>
-          <button class="preset-btn" data-index="1">Cyber Grid</button>
-          <button class="preset-btn" data-index="2">Gravitational Nebula</button>
+          <button class="preset-btn active" data-index="0">Nebula Drift</button>
+          <button class="preset-btn" data-index="1">Ion Filaments</button>
+          <button class="preset-btn" data-index="2">Quantum Pulsar</button>
         </div>
-        <p id="hud-effect-desc" class="hud-effect-desc">Raymarched 4D quantum core with chromatic aberration & gyroscopic mouse reaction.</p>
+        <p id="hud-effect-desc" class="hud-effect-desc">Lightweight domain-warped nebula with drifting star dust and a touch-reactive gravity vortex.</p>
       </div>
 
       <!-- Realtime Parameter Sliders -->

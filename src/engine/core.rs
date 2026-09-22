@@ -93,6 +93,16 @@ impl ShaderEngine {
         Ok(())
     }
 
+    pub fn set_mobile_mode(&mut self, is_mobile: bool) -> Result<(), JsValue> {
+        // DPR cap differs per mode, so the backing store may resize; keep the viewport in sync
+        if self.canvas_manager.set_mobile(is_mobile) {
+            self.canvas_manager.apply_viewport(&self.gl);
+        }
+        self.registry.set_mobile_mode(is_mobile);
+        self.compile_active_effect()?;
+        Ok(())
+    }
+
     pub fn resize(&mut self) {
         if self.canvas_manager.resize_to_window() {
             self.canvas_manager.apply_viewport(&self.gl);

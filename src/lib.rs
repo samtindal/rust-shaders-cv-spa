@@ -9,6 +9,9 @@ use crate::engine::ShaderEngine;
 use crate::effects::quantum_core::QuantumCoreEffect;
 use crate::effects::cyber_grid::CyberGridEffect;
 use crate::effects::gravitational_nebula::GravitationalNebulaEffect;
+use crate::effects::mobile_nebula::NebulaDriftMobileEffect;
+use crate::effects::mobile_filaments::IonFilamentsMobileEffect;
+use crate::effects::mobile_pulsar::QuantumPulsarMobileEffect;
 
 #[wasm_bindgen]
 pub struct ResumeShaderApp {
@@ -34,15 +37,30 @@ impl ResumeShaderApp {
 
         let mut engine = ShaderEngine::new(canvas)?;
 
-        // Register default shader effects
+        // Register default desktop shader effects
         engine.registry.register(Box::new(QuantumCoreEffect::new()));
         engine.registry.register(Box::new(CyberGridEffect::new()));
         engine.registry.register(Box::new(GravitationalNebulaEffect::new()));
+
+        // Register battery-friendly mobile-optimized shader effects
+        engine.registry.register_mobile(Box::new(NebulaDriftMobileEffect::new()));
+        engine.registry.register_mobile(Box::new(IonFilamentsMobileEffect::new()));
+        engine.registry.register_mobile(Box::new(QuantumPulsarMobileEffect::new()));
 
         // Compile initial active effect
         engine.compile_active_effect()?;
 
         Ok(ResumeShaderApp { engine })
+    }
+
+    #[wasm_bindgen]
+    pub fn set_mobile_mode(&mut self, is_mobile: bool) -> Result<(), JsValue> {
+        self.engine.set_mobile_mode(is_mobile)
+    }
+
+    #[wasm_bindgen]
+    pub fn is_mobile_mode(&self) -> bool {
+        self.engine.registry.is_mobile()
     }
 
     #[wasm_bindgen]
@@ -116,8 +134,8 @@ impl ResumeShaderApp {
     }
 
     #[wasm_bindgen]
-    pub fn on_scroll(&mut self, delta_y: f32) {
-        self.engine.input.on_scroll(delta_y);
+    pub fn on_scroll(&mut self, scroll_y: f32) {
+        self.engine.input.on_scroll(scroll_y);
     }
 
     #[wasm_bindgen]

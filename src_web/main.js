@@ -15,13 +15,19 @@ async function main() {
     // 2. Instantiate ResumeShaderApp attached to #shader-canvas
     app = new ResumeShaderApp('shader-canvas');
 
-    // 3. Setup HUD Preset Switcher
-    setupPresetSwitcher();
+    // 3. Detect mobile device and activate mobile-optimized shader presets
+    // Coarse primary pointer = phone/tablet; touchscreen laptops keep a fine pointer and stay on desktop shaders
+    const mobileQuery = window.matchMedia('(max-width: 768px), (pointer: coarse)');
+    if (mobileQuery.matches) {
+      app.set_mobile_mode(true);
+    }
 
-    // 4. Setup HUD Sliders
+    // 4. Setup HUD Controls
+    setupPresetSwitcher();
+    setupModeToggle(mobileQuery);
     setupSliders();
 
-    // 5. Setup Window and Pointer Event Listeners
+    // 5. Setup Input & Gyroscope Listeners
     setupInputListeners();
 
     // 6. Setup Resume Interactive Features (Filter & Print)
@@ -68,6 +74,44 @@ function setupPresetSwitcher() {
   if (descEl) {
     descEl.textContent = app.get_active_description();
   }
+}
+
+function setupModeToggle(mobileQuery) {
+  const modeBtn = document.getElementById('hud-mode-toggle-btn');
+  const badgeEl = document.querySelector('.hud-badge');
+  if (!modeBtn || !app) return;
+
+  function applyMode(isMobile) {
+    try {
+      app.set_mobile_mode(isMobile);
+      setupPresetSwitcher();
+      syncSlidersFromEngine();
+      updateModeUI();
+    } catch (e) {
+      console.error('Error toggling mobile mode:', e);
+    }
+  }
+
+  function updateModeUI() {
+    const isMobile = app.is_mobile_mode();
+    modeBtn.textContent = isMobile ? '⚡ Mobile Shaders (Active)' : '🖥️ Desktop Shaders (Active)';
+    modeBtn.className = `mode-toggle-btn ${isMobile ? 'mode-mobile' : 'mode-desktop'}`;
+    if (badgeEl) {
+      badgeEl.textContent = isMobile ? 'MOBILE WASM' : 'WASM 60FPS';
+    }
+  }
+
+  modeBtn.addEventListener('click', () => applyMode(!app.is_mobile_mode()));
+
+  // Follow viewport changes (rotation, window resize, DevTools device toolbar) after load;
+  // a manual toggle holds until the viewport next crosses the breakpoint
+  mobileQuery.addEventListener('change', (e) => {
+    if (e.matches !== app.is_mobile_mode()) {
+      applyMode(e.matches);
+    }
+  });
+
+  updateModeUI();
 }
 
 function setupSliders() {
@@ -148,7 +192,20 @@ function setupInputListeners() {
     }
   }, { passive: true });
 
-  // Mouse and Touch Pointer click for ripple shockwaves
+  // Mobile Device Orientation / Gyroscope tilt
+  if (window.DeviceOrientationEvent) {
+    window.addEventListener('deviceorientation', (e) => {
+      if (app && e.gamma !== null && e.beta !== null) {
+        // gamma: left-to-right tilt [-90, 90]
+        // beta: front-to-back tilt [-180, 180]
+        const normX = (e.gamma / 45.0) * (window.innerWidth * 0.5) + (window.innerWidth * 0.5);
+        const normY = ((e.beta - 30.0) / 45.0) * (window.innerHeight * 0.5) + (window.innerHeight * 0.5);
+        app.on_pointer_move(normX, normY);
+      }
+    }, { passive: true });
+  }
+
+  // Pointer click or touch tap for ripple shockwaves
   window.addEventListener('pointerdown', (e) => {
     // Ignore clicks inside HUD or interactive controls
     if (e.target.closest('#shader-hud') || e.target.closest('button') || e.target.closest('a') || e.target.closest('input')) {
@@ -168,7 +225,7 @@ function setupInputListeners() {
     }
   }, { passive: true });
 
-  // Window resize
+  // Window resize & responsive mobile orientation adaptation
   window.addEventListener('resize', () => {
     if (app) {
       app.resize();

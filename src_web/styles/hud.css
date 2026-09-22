@@ -113,12 +113,49 @@
   gap: 0.5rem;
 }
 
+.hud-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .hud-label {
   font-family: var(--font-mono);
   font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.06em;
   color: var(--text-muted);
+}
+
+.mode-toggle-btn {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  border: 1px solid transparent;
+}
+
+.mode-toggle-btn.mode-mobile {
+  background: rgba(0, 240, 170, 0.12);
+  border-color: rgba(0, 240, 170, 0.35);
+  color: var(--accent-emerald);
+}
+
+.mode-toggle-btn.mode-mobile:hover {
+  background: rgba(0, 240, 170, 0.25);
+}
+
+.mode-toggle-btn.mode-desktop {
+  background: rgba(0, 229, 255, 0.12);
+  border-color: rgba(0, 229, 255, 0.35);
+  color: var(--accent-cyan);
+}
+
+.mode-toggle-btn.mode-desktop:hover {
+  background: rgba(0, 229, 255, 0.25);
 }
 
 .hud-presets-grid {

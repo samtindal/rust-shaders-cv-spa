@@ -98,8 +98,9 @@ impl InputController {
         self.ripples.push(RippleEvent::new(x, y));
     }
 
-    pub fn on_scroll(&mut self, delta_y: f32) {
-        self.scroll_y += delta_y;
+    /// `scroll_y` is the absolute page offset (window.scrollY), not a delta
+    pub fn on_scroll(&mut self, scroll_y: f32) {
+        self.scroll_y = scroll_y;
     }
 
     pub fn update(&mut self, dt: f32) {
